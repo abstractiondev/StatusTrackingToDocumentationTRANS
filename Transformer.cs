@@ -85,7 +85,8 @@ namespace StatusTrackingToDocumentationTRANS
                                         text = headerText,
                                         level = 1,
                                     };
-            result.AddSubHeaderTableContent("Items", GetStatusItemTable(groupStatusItems));
+            //result.AddSubHeaderTableContent("Items", GetStatusItemTable(groupStatusItems));
+            result.AddHeaderTableContent(GetStatusItemTable(groupStatusItems));
             return result;
         }
 
@@ -139,7 +140,17 @@ namespace StatusTrackingToDocumentationTRANS
 
         private static string GetStyleName(StatusValueTypeTrafficLightIndicator trafficLightIndicator)
         {
-            return "";
+            switch(trafficLightIndicator)
+            {
+                case StatusValueTypeTrafficLightIndicator.green:
+                    return null;
+                case StatusValueTypeTrafficLightIndicator.yellow:
+                    return "color:blue;font-weight:bold;font-style:italic";
+                case StatusValueTypeTrafficLightIndicator.red:
+                    return "color:red;font-weight:bold;text-decoration:underline";
+                default:
+                    throw new NotSupportedException("Traffic light value: " + trafficLightIndicator);
+            }
         }
     }
 
