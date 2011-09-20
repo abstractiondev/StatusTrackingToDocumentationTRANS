@@ -25,10 +25,10 @@ namespace StatusTrackingToDocumentationTRANS
 
 
 
-	    public Tuple<string, string>[] GetGeneratorContent(params string[] xmlFileNames)
-	    {
+        public Tuple<string, string>[] GetGeneratorContent(params string[] xmlFileNames)
+        {
             List<Tuple<string, string>> result = new List<Tuple<string, string>>();
-            foreach(string xmlFileName in xmlFileNames)
+            foreach (string xmlFileName in xmlFileNames)
             {
                 StatusTrackingAbstractionType fromAbs = LoadXml<StatusTrackingAbstractionType>(xmlFileName);
                 DocumentationAbstractionType toAbs = TransformAbstraction(fromAbs);
@@ -37,8 +37,8 @@ namespace StatusTrackingToDocumentationTRANS
                 string contentFileName = "Documentation_From" + fInfo.Name;
                 result.Add(Tuple.Create(contentFileName, xmlContent));
             }
-	        return result.ToArray();
-	    }
+            return result.ToArray();
+        }
 
         private string WriteToXmlString(object toAbs)
         {
@@ -50,10 +50,43 @@ namespace StatusTrackingToDocumentationTRANS
             return result;
         }
 
-        public static DocumentationAbstractionType TransformAbstraction(StatusTrackingAbstractionType fromAbs)
+        public DocumentationAbstractionType TransformAbstraction(StatusTrackingAbstractionType fromAbs)
         {
-            return new DocumentationAbstractionType();
+            DocumentationAbstractionType toAbs = new DocumentationAbstractionType()
+            {
+                Documentations = new DocumentationsType { Documents = new[] { GetDocument(fromAbs) } }
+            };
+            return toAbs;
         }
 
+        private DocumentType GetDocument(StatusTrackingAbstractionType fromAbs)
+        {
+            DocumentType document = new DocumentType()
+                                        {
+                                            name = "Status Tracking Document",
+                                            title = "Status Tracking Document"
+                                        };
+
+            document.AddHeader(GetSummary(fromAbs));
+            Array.ForEach(fromAbs.Groups, groupItem => document.AddHeader(GetGroupStatus(groupItem, fromAbs)));
+            return document;
+        }
+
+        private HeaderType GetGroupStatus(GroupType grp, StatusTrackingAbstractionType fromAbs)
+        {
+            StatusItemType[] groupStatusItems = grp.GetStatusItems(fromAbs);
+            StatusSummaryItem groupSummary = grp.GetGroupSummary(fromAbs);
+            HeaderType result = new HeaderType
+                                    {
+                                        text = grp.name
+                                    };
+            return result;
+        }
+
+        private static HeaderType GetSummary(StatusTrackingAbstractionType fromAbs)
+        {
+            throw new NotImplementedException();
+        }
     }
+
 }
