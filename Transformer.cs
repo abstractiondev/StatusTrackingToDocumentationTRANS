@@ -109,11 +109,11 @@ namespace StatusTrackingToDocumentationTRANS
             List<TextType[]> rows = new List<TextType[]>();
             rows.AddRange(statusItems.Select(item => new TextType[]
                                                        {
-                                                           new TextType {TextContent = item.name, 
+                                                           new TextType {TextContent = item.displayName, 
                                                                styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)},
                                                            new TextType {TextContent = item.StatusValue.indicatorValue.ToString(),
                                                                styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)},
-                                                           new TextType {TextContent = "Item Desc TODO",
+                                                           new TextType {TextContent = item.description,
                                                                styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)}
                                                        }));
             table.Rows = rows.ToArray();
