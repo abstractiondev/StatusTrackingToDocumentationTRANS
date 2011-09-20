@@ -82,10 +82,7 @@ namespace StatusTrackingToDocumentationTRANS
                                         level = 1,
                                     };
             result.AddHeaderTextContent("", "Progress : " + groupSummary.GreenPercentage);
-            foreach(StatusItemType item in groupStatusItems)
-            {
-                result.AddSubHeaderTextContent(item.name, "", item.StatusValue.trafficLightIndicator.ToString());
-            }
+            result.AddSubHeaderTableContent("Items", GetStatusItemTable(groupStatusItems));
             return result;
         }
 
@@ -96,6 +93,36 @@ namespace StatusTrackingToDocumentationTRANS
             foreach(var summary in summaries)
                 summaryHeader.AddSubHeaderTextContent(summary.Name, "", "Status % = " + summary.Summary.GreenPercentage);
             return summaryHeader;
+        }
+
+        private static TableType GetStatusItemTable(StatusItemType[] statusItems)
+        {
+            TableType table = new TableType
+            {
+                Columns = new[]
+                                                    {
+                                                        new ColumnType {name = "Item"},
+                                                        new ColumnType {name = "Status"},
+                                                        new ColumnType {name = "Description"}
+                                                    }
+            };
+            List<TextType[]> rows = new List<TextType[]>();
+            rows.AddRange(statusItems.Select(item => new TextType[]
+                                                       {
+                                                           new TextType {TextContent = item.name, 
+                                                               styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)},
+                                                           new TextType {TextContent = item.StatusValue.indicatorValue.ToString(),
+                                                               styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)},
+                                                           new TextType {TextContent = "Item Desc TODO",
+                                                               styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)}
+                                                       }));
+            table.Rows = rows.ToArray();
+            return table;
+        }
+
+        private static string GetStyleName(StatusValueTypeTrafficLightIndicator trafficLightIndicator)
+        {
+            return "";
         }
     }
 
