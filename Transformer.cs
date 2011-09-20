@@ -85,7 +85,11 @@ namespace StatusTrackingToDocumentationTRANS
 
         private static HeaderType GetSummary(StatusTrackingAbstractionType fromAbs)
         {
-            throw new NotImplementedException();
+            HeaderType summaryHeader = new HeaderType {text = "Summary"};
+            var summaries = fromAbs.Groups.Select(grp => new { Name = grp.name, Summary = grp.GetGroupSummary(true, fromAbs) }).ToArray();
+            foreach(var summary in summaries)
+                summaryHeader.AddSubHeaderTextContent(summary.Name, "", "Status % = " + summary.Summary.GreenPercentage);
+            return summaryHeader;
         }
     }
 
