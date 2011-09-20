@@ -68,7 +68,8 @@ namespace StatusTrackingToDocumentationTRANS
                                         };
 
             document.AddHeader(GetSummary(fromAbs));
-            Array.ForEach(fromAbs.Groups, groupItem => document.AddHeader(GetGroupStatus(groupItem, fromAbs)));
+            Array.ForEach(fromAbs.Groups.OrderBy(grp => grp.name).ToArray(), 
+                groupItem => document.AddHeader(GetGroupStatus(groupItem, fromAbs)));
             return document;
         }
 
@@ -76,12 +77,14 @@ namespace StatusTrackingToDocumentationTRANS
         {
             StatusItemType[] groupStatusItems = grp.GetStatusItems(fromAbs);
             StatusSummaryItem groupSummary = grp.GetGroupSummary(fromAbs);
+            if (groupSummary.IsComplete)
+                return null;
+            string headerText = grp.name + String.Format(" ({0:P0})", groupSummary.GreenRatio);
             HeaderType result = new HeaderType
                                     {
-                                        text = grp.name,
+                                        text = headerText,
                                         level = 1,
                                     };
-            result.AddHeaderTextContent("", "Progress : " + groupSummary.GreenPercentage);
             result.AddSubHeaderTableContent("Items", GetStatusItemTable(groupStatusItems));
             return result;
         }
@@ -89,9 +92,23 @@ namespace StatusTrackingToDocumentationTRANS
         private static HeaderType GetSummary(StatusTrackingAbstractionType fromAbs)
         {
             HeaderType summaryHeader = new HeaderType {text = "Summary", level = 1};
-            var summaries = fromAbs.Groups.Select(grp => new { Name = grp.name, Summary = grp.GetGroupSummary(true, fromAbs) }).ToArray();
+            var summaries =
+                fromAbs.Groups.Select(grp => new {Name = grp.name, Summary = grp.GetGroupSummary(true, fromAbs)});
+            summaries =
+                summaries.Where(summary => summary.Summary.IsIncomplete).OrderByDescending(
+                    summary => summary.Summary.RedRatio).ThenByDescending(summary => summary.Summary.YellowRatio);
             foreach(var summary in summaries)
-                summaryHeader.AddSubHeaderTextContent(summary.Name, "", "Status % = " + summary.Summary.GreenPercentage);
+            {
+                string[] summaryStrings = new string[]
+                                              {
+                                                  summary.Summary.RedSummaryString,
+                                                  summary.Summary.YellowSummaryString,
+                                                  summary.Summary.GreenSummaryString
+                                              }.Where(item => String.IsNullOrWhiteSpace(item) == false).ToArray();
+                string summaryString = String.Join(", ", summaryStrings);
+                string headerText = summary.Name + String.Format(" ({0:P0})", summary.Summary.GreenRatio);
+                HeaderType subHeader = summaryHeader.AddSubHeaderTextContent(headerText, null, summaryString);
+            }
             return summaryHeader;
         }
 
@@ -111,7 +128,7 @@ namespace StatusTrackingToDocumentationTRANS
                                                        {
                                                            new TextType {TextContent = item.displayName, 
                                                                styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)},
-                                                           new TextType {TextContent = item.StatusValue.indicatorValue.ToString(),
+                                                           new TextType {TextContent = item.StatusValue.indicatorDisplayText,
                                                                styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)},
                                                            new TextType {TextContent = item.description,
                                                                styleRef = GetStyleName(item.StatusValue.trafficLightIndicator)}
