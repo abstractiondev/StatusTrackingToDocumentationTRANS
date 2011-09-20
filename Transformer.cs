@@ -78,14 +78,20 @@ namespace StatusTrackingToDocumentationTRANS
             StatusSummaryItem groupSummary = grp.GetGroupSummary(fromAbs);
             HeaderType result = new HeaderType
                                     {
-                                        text = grp.name
+                                        text = grp.name,
+                                        level = 1,
                                     };
+            result.AddHeaderTextContent("", "Progress : " + groupSummary.GreenPercentage);
+            foreach(StatusItemType item in groupStatusItems)
+            {
+                result.AddSubHeaderTextContent(item.name, "", item.StatusValue.trafficLightIndicator.ToString());
+            }
             return result;
         }
 
         private static HeaderType GetSummary(StatusTrackingAbstractionType fromAbs)
         {
-            HeaderType summaryHeader = new HeaderType {text = "Summary"};
+            HeaderType summaryHeader = new HeaderType {text = "Summary", level = 1};
             var summaries = fromAbs.Groups.Select(grp => new { Name = grp.name, Summary = grp.GetGroupSummary(true, fromAbs) }).ToArray();
             foreach(var summary in summaries)
                 summaryHeader.AddSubHeaderTextContent(summary.Name, "", "Status % = " + summary.Summary.GreenPercentage);
