@@ -94,10 +94,18 @@ namespace StatusTrackingToDocumentationTRANS
         {
             HeaderType summaryHeader = new HeaderType {text = "Summary", level = 1};
             var summaries =
-                fromAbs.Groups.Select(grp => new {Name = grp.name, Summary = grp.GetGroupSummary(true, fromAbs)});
+                fromAbs.Groups.Select(grp => new
+                                                 {
+                                                     Name = grp.name,
+                                                     IsRoot = grp.groupRole == GroupTypeGroupRole.Root,
+                                                     RootOrder = grp.groupRole == GroupTypeGroupRole.Root ? 0 : 1,
+                                                     Summary = grp.GetGroupSummary(true, fromAbs)
+                                                 });
             summaries =
-                summaries.Where(summary => summary.Summary.IsIncomplete).OrderByDescending(
-                    summary => summary.Summary.RedRatio).ThenByDescending(summary => summary.Summary.YellowRatio);
+                summaries.Where(summary => summary.Summary.IsIncomplete)
+                    .OrderBy(summary => summary.RootOrder)
+                    .ThenByDescending(summary => summary.Summary.RedRatio)
+                    .ThenByDescending(summary => summary.Summary.YellowRatio);
             foreach(var summary in summaries)
             {
                 string[] summaryStrings = new string[]
@@ -107,7 +115,8 @@ namespace StatusTrackingToDocumentationTRANS
                                                   summary.Summary.GreenSummaryString
                                               }.Where(item => String.IsNullOrWhiteSpace(item) == false).ToArray();
                 string summaryString = String.Join(", ", summaryStrings);
-                string headerText = summary.Name + String.Format(" ({0:P0})", summary.Summary.GreenRatio);
+                string rootPrefix = summary.IsRoot ? "(R) " : "";
+                string headerText = rootPrefix + summary.Name + String.Format(" ({0:P0})", summary.Summary.GreenRatio);
                 HeaderType subHeader = summaryHeader.AddSubHeaderTextContent(headerText, null, summaryString);
             }
             return summaryHeader;
