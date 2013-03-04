@@ -61,10 +61,15 @@ namespace StatusTrackingToDocumentationTRANS
 
         private DocumentType GetDocument(StatusTrackingAbstractionType fromAbs)
         {
+            string docDetails;
+            if (String.IsNullOrEmpty(fromAbs.StatusItems.scopeName))
+                docDetails = "";
+            else
+                docDetails = " (" + fromAbs.StatusItems.scopeName + ")";
             DocumentType document = new DocumentType()
                                         {
-                                            name = "Status Tracking Document",
-                                            title = "Status Tracking Document"
+                                            name = "Status Tracking Document" + docDetails,
+                                            title = "Status Tracking Document" + docDetails
                                         };
 
             document.AddHeader(GetSummary(fromAbs));
